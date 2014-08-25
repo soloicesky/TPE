@@ -81,6 +81,7 @@ static int packLength(unsigned char *desMsg, unsigned short *desMsgLen,
 		return 0;
 	}
 
+#if 0
 	switch (fd->attr.varlenLen) {
 	case L:
 		*desMsg = (fd->content.length);
@@ -98,7 +99,10 @@ static int packLength(unsigned char *desMsg, unsigned short *desMsgLen,
 		*desMsgLen = 2;
 		break;
 	}
-
+#else
+	sprintf((char *)desMsg, "%d", fd->content.length);
+	*desMsgLen = fd->content.length;
+#endif
 	return 0;
 }
 
@@ -121,6 +125,7 @@ static int packNumericField(unsigned char *desMsg, unsigned short *desMsgLen,
 		return ERR_NULL_POINTER;
 	}
 
+#if 0
 	bcdBuf = (unsigned char *) malloc(
 			sizeof(unsigned char) * (fd->content.length / 2));
 
@@ -145,7 +150,18 @@ static int packNumericField(unsigned char *desMsg, unsigned short *desMsgLen,
 
 	memcpy(desMsg + *desMsgLen, bcdBuf, len);
 	*desMsgLen += ((fd->content.length + 1) / 2);
+#else
+	ret = packLength(desMsg, desMsgLen, fd);
 
+	if (ret) {
+		return ret;
+	}
+
+	memcpy(desMsg + *desMsgLen, fd->content.value, fd->content.length);
+	*desMsgLen += fd->content.length;
+
+
+#endif
 	return ret;
 }
 
